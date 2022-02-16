@@ -10,8 +10,8 @@ fn main() {
 
 	// Create random board to start
 	let mut board = random_board(&mut rng);
-
-
+	let attacks = queens_attacking(&board);
+	println!("attacks: {attacks}");
 
 }
 
@@ -49,12 +49,12 @@ fn queens_attacking(board: &Vec<usize>) -> u8 {
 
 		// Check if any are in a diagonal from here
 		for j in 0..board_len {
-			let vertical_gap = row - board[j];
+			let vertical_gap = row as i8 - board[j] as i8;
 
-			if i - j == vertical_gap {
+			if i as i8 - j as i8 == vertical_gap {
 				attacks += 1;
 			}
-			if j - i == vertical_gap {
+			if j as i8 - i as i8 == vertical_gap {
 				attacks += 1;
 			}
 		}
