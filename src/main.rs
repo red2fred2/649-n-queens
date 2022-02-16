@@ -1,5 +1,3 @@
-use std::collections::btree_map::Range;
-
 use rand::{prelude::ThreadRng, Rng};
 
 const BOARD_SIZE: usize = 8;
@@ -49,16 +47,20 @@ fn queens_attacking(board: &Vec<usize>) -> u8 {
 
 		// Check if any are in a diagonal from here
 		for j in 0..board_len {
-			let vertical_gap = row as i8 - board[j] as i8;
+			let vertical_gap = row as isize - board[j] as isize;
 
-			if i as i8 - j as i8 == vertical_gap {
+			if i as isize - j as isize == vertical_gap {
 				attacks += 1;
 			}
-			if j as i8 - i as i8 == vertical_gap {
+			if j as isize- i as isize == vertical_gap {
 				attacks += 1;
 			}
 		}
 	}
 
 	attacks
+}
+
+fn print_board(board: &Vec<usize>) {
+
 }
