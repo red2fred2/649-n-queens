@@ -27,6 +27,8 @@ fn random_restart_hill_climb(
 
 }
 
+
+/// Does 1 single step on one column in a hill climb
 fn hill_step(
 	board: &mut Vec<usize>,
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
