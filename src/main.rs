@@ -1,6 +1,6 @@
 use rand::{prelude::ThreadRng, Rng};
 
-const BOARD_SIZE: usize = 8;
+const BOARD_SIZE: usize = 5;
 
 fn main() {
 	// Set up random number generator
@@ -13,6 +13,8 @@ fn main() {
 	println!("-------------------------------------------------------------");
 	print_board(&board);
 	print_board_as_stupid_string(&board);
+	let attacks = queens_attacking(&board);
+	println!("attacks: {attacks}");
 	println!("Fitness checks: {fitness_checks}");
 }
 
@@ -36,7 +38,8 @@ fn simulated_annealing(
 
 		// Check a random board
 		let next_board = random_successor(&board, rng);
-		let fitness_diff = current_fitness as i16 - fitness_fn(&next_board) as i16;
+		let next_fitness = fitness_fn(&next_board);
+		let fitness_diff = next_fitness as i16 - current_fitness as i16;
 		fitness_checks += 1;
 
 		// Check if this board should replace the last
@@ -51,6 +54,7 @@ fn simulated_annealing(
 			// If the second chance succeeds, set the board anyway
 			if probability > rand {
 				board = next_board;
+				current_fitness = next_fitness;
 			}
 		}
 
