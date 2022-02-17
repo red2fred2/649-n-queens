@@ -9,9 +9,19 @@ fn main() {
 	// Create random board to start
 	let mut board = random_board(&mut rng);
 
+	// Print board before algorithm
+	print_board(&board);
+	let attacks = queens_attacking(&board);
+	println!("Attacks: {attacks}");
+
 	// Do rrhc
 	random_restart_hill_climb(&mut board, &queens_attacking, &mut rng);
+
+	// Print resulting board
+	println!("-------------------------------------------------------------");
 	print_board(&board);
+	let attacks = queens_attacking(&board);
+	println!("Attacks: {attacks}");
 }
 
 // Do a random restart hill climbing algorithm until the fitness function returns 0
@@ -20,20 +30,47 @@ fn random_restart_hill_climb(
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
 	rng: &mut ThreadRng
 ) {
-
-	// Do a random hill climb
-	let col = rng.gen_range(0..BOARD_SIZE);
-	hill_step(board, fitness_fn, col);
-
+	// Random hill climb
+	hill_climb(board, fitness_fn, rng);
 }
 
+// Climbs up until no real change is happening
+fn hill_climb(
+	board: &mut Vec<usize>,
+	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
+	rng: &mut ThreadRng
+) -> u8 {
+	let mut scores = Vec::new();
+
+	loop {
+		// Pick a random column and step in it
+		let col = rng.gen_range(0..BOARD_SIZE);
+		let fitness = hill_step(board, fitness_fn, col);
+
+		// Stop working if the board is perfect
+		if fitness == 0 {
+			return fitness
+		}
+
+		// Give up if there hasn't been much improvement recently
+		scores.push(fitness);
+
+		let last_scores = scores.iter().rev().take(BOARD_SIZE*2);
+		let sum_of_last_scores: u8 = last_scores.sum();
+		let avg_of_last_scores = sum_of_last_scores / BOARD_SIZE as u8 / 2;
+
+		if scores.len() > BOARD_SIZE * 2 && avg_of_last_scores == fitness {
+			return fitness
+		}
+	}
+}
 
 /// Does 1 single step on one column in a hill climb
 fn hill_step(
 	board: &mut Vec<usize>,
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
 	col: usize
-) {
+) -> u8 {
 	let mut best_row = board[col];
 	let mut best_fitness = u8::MAX;
 
@@ -51,6 +88,7 @@ fn hill_step(
 	}
 	// Set best fitness
 	board[col] = best_row;
+	best_fitness
 }
 
 /// Returns a board with random data
