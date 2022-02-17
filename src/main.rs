@@ -1,5 +1,6 @@
 use rand::{prelude::ThreadRng, Rng};
 
+const ANNEALING_STEPS: f32 = 10.;
 const BOARD_SIZE: usize = 5;
 
 fn main() {
@@ -7,7 +8,7 @@ fn main() {
 	let mut rng = rand::thread_rng();
 
 	// let (board, fitness_checks) = random_restart_hill_climb(&queens_attacking, &mut rng);
-	let (board, fitness_checks) = simulated_annealing(&queens_attacking, &linear_schedule, &mut rng);
+	let (board, fitness_checks) = simulated_annealing(&queens_attacking, &schedule, &mut rng);
 
 	// Print resulting board
 	println!("-------------------------------------------------------------");
@@ -20,7 +21,7 @@ fn main() {
 
 fn simulated_annealing(
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
-	schedule_fn: &dyn Fn(&u32) -> u32,
+	schedule_fn: &dyn Fn(&u32) -> f32,
 	rng: &mut ThreadRng
 ) -> (Vec<usize>, u64) {
 	let mut board = random_board(rng);
@@ -32,24 +33,32 @@ fn simulated_annealing(
 		let temperature = schedule_fn(&time);
 
 		// If T = 0, return
-		if temperature <= 0 {
+		if temperature < f32::MIN_POSITIVE {
 			return (board, fitness_checks)
 		}
 
 		// Check a random board
 		let next_board = random_successor(&board, rng);
 		let next_fitness = fitness_fn(&next_board);
-		let fitness_diff = next_fitness as i16 - current_fitness as i16;
+
+		println!("current: {current_fitness}, next: {next_fitness}");
+
+		let fitness_diff = current_fitness as i16 - next_fitness as i16;
 		fitness_checks += 1;
+
+		println!("fitness diff: {fitness_diff}");
 
 		// Check if this board should replace the last
 		if fitness_diff > 0 {
 			board = next_board;
+			current_fitness = next_fitness;
 		} else {
 			// Calculate second chance
 			let rand = rng.gen_range(0.0..1.0);
-			let exponent = fitness_diff as f32 / temperature as f32;
+			let exponent = fitness_diff as f32 / temperature;
 			let probability = std::f32::consts::E.powf(exponent);
+
+			println!("prob: {probability}");
 
 			// If the second chance succeeds, set the board anyway
 			if probability > rand {
@@ -63,9 +72,9 @@ fn simulated_annealing(
 	}
 }
 
-// Linear annealing schedule
-fn linear_schedule(t: &u32) -> u32 {
-	1000 - t
+// Annealing schedule
+fn schedule(t: &u32) -> f32 {
+	ANNEALING_STEPS.ln() - (*t as f32).ln()
 }
 
 // Makes a random move on the board
