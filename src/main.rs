@@ -11,6 +11,7 @@ fn main() {
 	// Print resulting board
 	println!("-------------------------------------------------------------");
 	print_board(&board);
+	print_board_as_stupid_string(&board);
 	println!("Fitness checks: {fitness_checks}");
 }
 
@@ -187,4 +188,13 @@ fn print_board(board: &Vec<usize>) {
 		}
 		println!("+");
 	}
+}
+
+// Prints the solution as a hard to understand string
+fn print_board_as_stupid_string(board: &Vec<usize>) {
+	print!("Solution: ");
+	for row in board {
+		print!("{row}");
+	}
+	println!();
 }
