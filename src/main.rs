@@ -1,5 +1,3 @@
-use std::ptr;
-
 use rand::{prelude::ThreadRng, Rng};
 
 const BOARD_SIZE: usize = 8;
@@ -9,7 +7,7 @@ fn main() {
 	let mut rng = rand::thread_rng();
 
 	// Create random board to start
-	let mut board = random_board(&mut rng);
+	let board = random_board(&mut rng);
 	let attacks = queens_attacking(&board);
 
 	println!("attacks: {attacks}");
