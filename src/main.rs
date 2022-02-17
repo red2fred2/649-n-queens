@@ -3,19 +3,16 @@ use rand::{prelude::ThreadRng, Rng};
 const BOARD_SIZE: usize = 5;
 
 fn main() {
-	for _ in 0..1_000_000 {
 	// Set up random number generator
 	let mut rng = rand::thread_rng();
 
 	let board = random_restart_hill_climb(&queens_attacking, &mut rng);
 
-	// // Print resulting board
-	// println!("-------------------------------------------------------------");
-	// print_board(&board);
-	// let attacks = queens_attacking(&board);
-	// println!("Attacks: {attacks}");
-	}
-	println!("Woo!")
+	// Print resulting board
+	println!("-------------------------------------------------------------");
+	print_board(&board);
+	let attacks = queens_attacking(&board);
+	println!("Attacks: {attacks}");
 }
 
 // Do a random restart hill climbing algorithm until the fitness function returns 0
