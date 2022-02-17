@@ -58,7 +58,9 @@ fn queens_attacking(board: &Vec<usize>) -> u8 {
 		}
 	}
 
-	attacks
+	// Divide b two because any queen that can be attacked can also attack the
+	// one they're vulnerable to.
+	attacks / 2
 }
 
 /// Prints out a current board
