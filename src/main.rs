@@ -1,14 +1,15 @@
 use rand::{prelude::ThreadRng, Rng};
 
-const ANNEALING_STEPS: f32 = 10.;
-const BOARD_SIZE: usize = 5;
+const BOARD_SIZE: usize = 8;
+const T0: f32 = 30.;
+const A: f32 = 0.998;
 
 fn main() {
 	// Set up random number generator
 	let mut rng = rand::thread_rng();
 
 	// let (board, fitness_checks) = random_restart_hill_climb(&queens_attacking, &mut rng);
-	let (board, fitness_checks) = simulated_annealing(&queens_attacking, &schedule, &mut rng);
+	let (board, fitness_checks) = simulated_annealing(&queens_attacking, &mut rng);
 
 	// Print resulting board
 	println!("-------------------------------------------------------------");
@@ -21,16 +22,15 @@ fn main() {
 
 fn simulated_annealing(
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
-	schedule_fn: &dyn Fn(&u32) -> f32,
 	rng: &mut ThreadRng
 ) -> (Vec<usize>, u64) {
 	let mut board = random_board(rng);
-	let mut time = 0;
 	let mut fitness_checks = 1;
 	let mut current_fitness = fitness_fn(&board);
+	let mut temperature = T0;
 
 	loop {
-		let temperature = schedule_fn(&time);
+		temperature = temperature * A;
 
 		// If T = 0, return
 		if temperature < f32::MIN_POSITIVE {
@@ -59,15 +59,7 @@ fn simulated_annealing(
 				current_fitness = next_fitness;
 			}
 		}
-
-		// Increment time
-		time += 1;
 	}
-}
-
-// Annealing schedule
-fn schedule(t: &u32) -> f32 {
-	ANNEALING_STEPS.ln() - (*t as f32).ln()
 }
 
 // Makes a random move on the board
