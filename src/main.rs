@@ -3,41 +3,34 @@ use rand::{prelude::ThreadRng, Rng};
 const BOARD_SIZE: usize = 5;
 
 fn main() {
+	for _ in 0..1_000_000 {
 	// Set up random number generator
 	let mut rng = rand::thread_rng();
 
-	// Create random board to start
-	let mut board = random_board(&mut rng);
+	let board = random_restart_hill_climb(&queens_attacking, &mut rng);
 
-	// Print board before algorithm
-	print_board(&board);
-	let attacks = queens_attacking(&board);
-	println!("Attacks: {attacks}");
-
-	// Do rrhc
-	let board = random_restart_hill_climb(board, &queens_attacking, &mut rng);
-
-	// Print resulting board
-	println!("-------------------------------------------------------------");
-	print_board(&board);
-	let attacks = queens_attacking(&board);
-	println!("Attacks: {attacks}");
+	// // Print resulting board
+	// println!("-------------------------------------------------------------");
+	// print_board(&board);
+	// let attacks = queens_attacking(&board);
+	// println!("Attacks: {attacks}");
+	}
+	println!("Woo!")
 }
 
 // Do a random restart hill climbing algorithm until the fitness function returns 0
 fn random_restart_hill_climb(
-	board: Vec<usize>,
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
 	rng: &mut ThreadRng
 ) -> Vec<usize> {
 	loop {
 		// Random hill climb
-		let mut temp_board = board.clone();
-		let fitness = hill_climb(&mut temp_board, fitness_fn, rng);
+		let mut board = random_board(rng);
+		let fitness = hill_climb(&mut board, fitness_fn, rng);
 
 		// If it's perfect already, no reason to do that again
 		if fitness == 0 {
-			return temp_board.clone()
+			return board
 		}
 	}
 }
