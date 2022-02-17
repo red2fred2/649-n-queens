@@ -7,11 +7,48 @@ fn main() {
 	let mut rng = rand::thread_rng();
 
 	// Create random board to start
-	let board = random_board(&mut rng);
-	let attacks = queens_attacking(&board);
+	let mut board = random_board(&mut rng);
 
-	println!("attacks: {attacks}");
+	// Do rrhc
+	random_restart_hill_climb(&mut board, &queens_attacking, &mut rng);
 	print_board(&board);
+}
+
+// Do a random restart hill climbing algorithm until the fitness function returns 0
+fn random_restart_hill_climb(
+	board: &mut Vec<usize>,
+	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
+	rng: &mut ThreadRng
+) {
+
+	// Do a random hill climb
+	let col = rng.gen_range(0..BOARD_SIZE);
+	hill_step(board, fitness_fn, col);
+
+}
+
+fn hill_step(
+	board: &mut Vec<usize>,
+	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
+	col: usize
+) {
+	let mut best_row = board[col];
+	let mut best_fitness = u8::MAX;
+
+	// Go through possible moves
+	for row in 0..BOARD_SIZE {
+		// Change then test
+		board[col] = row;
+		let fitness = fitness_fn(board);
+
+		// Change if better
+		if fitness < best_fitness {
+			best_fitness = fitness;
+			best_row = row;
+		}
+	}
+	// Set best fitness
+	board[col] = best_row;
 }
 
 /// Returns a board with random data
