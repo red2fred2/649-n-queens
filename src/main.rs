@@ -1,6 +1,6 @@
 use rand::{prelude::ThreadRng, Rng};
 
-const BOARD_SIZE: usize = 4;
+const BOARD_SIZE: usize = 5;
 
 fn main() {
 	// Set up random number generator
@@ -42,7 +42,7 @@ fn queens_attacking(board: &Vec<usize>) -> u8 {
 			// If a different column has the same row value
 			if j != i && board[j] == row {
 				attacks += 1;
-				println!("col {i} sees a row attack against col {j}");
+				// println!("col {i} sees a row attack against col {j}");
 			}
 		}
 
@@ -52,11 +52,11 @@ fn queens_attacking(board: &Vec<usize>) -> u8 {
 
 			if i != j && i as i8 - j as i8 == vertical_gap {
 				attacks += 1;
-				println!("col {i} sees desc attack against col {j}");
+				// println!("col {i} sees desc attack against col {j}");
 			}
 			if i != j && j as i8 - i as i8 == vertical_gap {
 				attacks += 1;
-				println!("col {i} sees asc attack col {j}");
+				// println!("col {i} sees asc attack col {j}");
 			}
 		}
 	}
