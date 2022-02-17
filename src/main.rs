@@ -1,33 +1,35 @@
 use rand::{prelude::ThreadRng, Rng};
 
-const BOARD_SIZE: usize = 5;
+const BOARD_SIZE: usize = 8;
 
 fn main() {
 	// Set up random number generator
 	let mut rng = rand::thread_rng();
 
-	let board = random_restart_hill_climb(&queens_attacking, &mut rng);
+	let (board, fitness_checks) = random_restart_hill_climb(&queens_attacking, &mut rng);
 
 	// Print resulting board
 	println!("-------------------------------------------------------------");
 	print_board(&board);
-	let attacks = queens_attacking(&board);
-	println!("Attacks: {attacks}");
+	println!("Fitness checks: {fitness_checks}");
 }
 
 // Do a random restart hill climbing algorithm until the fitness function returns 0
 fn random_restart_hill_climb(
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
 	rng: &mut ThreadRng
-) -> Vec<usize> {
+) -> (Vec<usize>, u64) {
+	let mut fitness_checks = 0;
+
 	loop {
 		// Random hill climb
 		let mut board = random_board(rng);
-		let fitness = hill_climb(&mut board, fitness_fn, rng);
+		let (fitness, checks) = hill_climb(&mut board, fitness_fn, rng);
+		fitness_checks += checks;
 
 		// If it's perfect already, no reason to do that again
 		if fitness == 0 {
-			return board
+			return (board, fitness_checks)
 		}
 	}
 }
@@ -37,17 +39,19 @@ fn hill_climb(
 	board: &mut Vec<usize>,
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
 	rng: &mut ThreadRng
-) -> u8 {
+) -> (u8, u64) {
 	let mut scores = Vec::new();
+	let mut fitness_checks = 0;
 
 	loop {
 		// Pick a random column and step in it
 		let col = rng.gen_range(0..BOARD_SIZE);
-		let fitness = hill_step(board, fitness_fn, col);
+		let (fitness, checks) = hill_step(board, fitness_fn, col);
+		fitness_checks += checks;
 
 		// Stop working if the board is perfect
 		if fitness == 0 {
-			return fitness
+			return (fitness, fitness_checks)
 		}
 
 		// Give up if there hasn't been much improvement recently
@@ -58,7 +62,7 @@ fn hill_climb(
 		let avg_of_last_scores = sum_of_last_scores / BOARD_SIZE as u8 / 2;
 
 		if scores.len() > BOARD_SIZE * 2 && avg_of_last_scores == fitness {
-			return fitness
+			return (fitness, fitness_checks)
 		}
 	}
 }
@@ -68,15 +72,17 @@ fn hill_step(
 	board: &mut Vec<usize>,
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
 	col: usize
-) -> u8 {
+) -> (u8, u64) {
 	let mut best_row = board[col];
 	let mut best_fitness = u8::MAX;
+	let mut fitness_checks = 0;
 
 	// Go through possible moves
 	for row in 0..BOARD_SIZE {
 		// Change then test
 		board[col] = row;
 		let fitness = fitness_fn(board);
+		fitness_checks += 1;
 
 		// Change if better
 		if fitness < best_fitness {
@@ -86,7 +92,7 @@ fn hill_step(
 	}
 	// Set best fitness
 	board[col] = best_row;
-	best_fitness
+	(best_fitness, fitness_checks)
 }
 
 /// Returns a board with random data
