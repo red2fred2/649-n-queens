@@ -15,7 +15,7 @@ fn main() {
 	println!("Attacks: {attacks}");
 
 	// Do rrhc
-	random_restart_hill_climb(&mut board, &queens_attacking, &mut rng);
+	let board = random_restart_hill_climb(board, &queens_attacking, &mut rng);
 
 	// Print resulting board
 	println!("-------------------------------------------------------------");
@@ -26,12 +26,20 @@ fn main() {
 
 // Do a random restart hill climbing algorithm until the fitness function returns 0
 fn random_restart_hill_climb(
-	board: &mut Vec<usize>,
+	board: Vec<usize>,
 	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
 	rng: &mut ThreadRng
-) {
-	// Random hill climb
-	hill_climb(board, fitness_fn, rng);
+) -> Vec<usize> {
+	loop {
+		// Random hill climb
+		let mut temp_board = board.clone();
+		let fitness = hill_climb(&mut temp_board, fitness_fn, rng);
+
+		// If it's perfect already, no reason to do that again
+		if fitness == 0 {
+			return temp_board.clone()
+		}
+	}
 }
 
 // Climbs up until no real change is happening
