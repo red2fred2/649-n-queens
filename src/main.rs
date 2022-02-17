@@ -6,13 +6,74 @@ fn main() {
 	// Set up random number generator
 	let mut rng = rand::thread_rng();
 
-	let (board, fitness_checks) = random_restart_hill_climb(&queens_attacking, &mut rng);
+	// let (board, fitness_checks) = random_restart_hill_climb(&queens_attacking, &mut rng);
+	let (board, fitness_checks) = simulated_annealing(&queens_attacking, &linear_schedule, &mut rng);
 
 	// Print resulting board
 	println!("-------------------------------------------------------------");
 	print_board(&board);
 	print_board_as_stupid_string(&board);
 	println!("Fitness checks: {fitness_checks}");
+}
+
+fn simulated_annealing(
+	fitness_fn: &dyn Fn(&Vec<usize>) -> u8,
+	schedule_fn: &dyn Fn(&u32) -> u32,
+	rng: &mut ThreadRng
+) -> (Vec<usize>, u64) {
+	let mut board = random_board(rng);
+	let mut time = 0;
+	let mut fitness_checks = 1;
+	let mut current_fitness = fitness_fn(&board);
+
+	loop {
+		let temperature = schedule_fn(&time);
+
+		// If T = 0, return
+		if temperature <= 0 {
+			return (board, fitness_checks)
+		}
+
+		// Check a random board
+		let next_board = random_successor(&board, rng);
+		let fitness_diff = current_fitness as i16 - fitness_fn(&next_board) as i16;
+		fitness_checks += 1;
+
+		// Check if this board should replace the last
+		if fitness_diff > 0 {
+			board = next_board;
+		} else {
+			// Calculate second chance
+			let rand = rng.gen_range(0.0..1.0);
+			let exponent = fitness_diff as f32 / temperature as f32;
+			let probability = std::f32::consts::E.powf(exponent);
+
+			// If the second chance succeeds, set the board anyway
+			if probability > rand {
+				board = next_board;
+			}
+		}
+
+		// Increment time
+		time += 1;
+	}
+}
+
+// Linear annealing schedule
+fn linear_schedule(t: &u32) -> u32 {
+	1000 - t
+}
+
+// Makes a random move on the board
+fn random_successor(board: &Vec<usize>, rng: &mut ThreadRng) -> Vec<usize> {
+	// Pick a random column to set to a random row
+	let col = rng.gen_range(0..BOARD_SIZE);
+	let row = rng.gen_range(0..BOARD_SIZE);
+
+	// Make that move
+	let mut new_board = board.clone();
+	new_board[col] = row;
+	new_board
 }
 
 // Do a random restart hill climbing algorithm until the fitness function returns 0
