@@ -40,13 +40,8 @@ fn simulated_annealing(
 		// Check a random board
 		let next_board = random_successor(&board, rng);
 		let next_fitness = fitness_fn(&next_board);
-
-		println!("current: {current_fitness}, next: {next_fitness}");
-
 		let fitness_diff = current_fitness as i16 - next_fitness as i16;
 		fitness_checks += 1;
-
-		println!("fitness diff: {fitness_diff}");
 
 		// Check if this board should replace the last
 		if fitness_diff > 0 {
@@ -57,8 +52,6 @@ fn simulated_annealing(
 			let rand = rng.gen_range(0.0..1.0);
 			let exponent = fitness_diff as f32 / temperature;
 			let probability = std::f32::consts::E.powf(exponent);
-
-			println!("prob: {probability}");
 
 			// If the second chance succeeds, set the board anyway
 			if probability > rand {
