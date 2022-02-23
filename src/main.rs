@@ -2,18 +2,25 @@ use rand::{prelude::ThreadRng, Rng};
 
 const BOARD_SIZE: usize = 8;
 const RAND_COL: bool = true;
+const RUNS: usize = 10_000;
 
 fn main() {
 	// Set up random number generator
 	let mut rng = rand::thread_rng();
+	let mut total_checks = 0;
 
-	let (board, fitness_checks) = random_restart_hill_climb(&queens_attacking, &mut rng);
+	for _ in 0..RUNS {
+		let (board, fitness_checks) = random_restart_hill_climb(&queens_attacking, &mut rng);
+		total_checks += fitness_checks;
+	}
+	// let (board, fitness_checks) = random_restart_hill_climb(&queens_attacking, &mut rng);
 
-	// Print resulting board
-	println!("-------------------------------------------------------------");
-	print_board(&board);
-	print_board_as_stupid_string(&board);
-	println!("Fitness checks: {fitness_checks}");
+	// // Print resulting board
+	// println!("-------------------------------------------------------------");
+	// print_board(&board);
+	// print_board_as_stupid_string(&board);
+	let avg_checks = total_checks / RUNS as u64;
+	println!("Avg fitness checks: {avg_checks}");
 }
 
 // Do a random restart hill climbing algorithm until the fitness function returns 0
