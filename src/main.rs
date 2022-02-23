@@ -1,6 +1,7 @@
 use rand::{prelude::ThreadRng, Rng};
 
 const BOARD_SIZE: usize = 8;
+const RAND_COL: bool = true;
 
 fn main() {
 	// Set up random number generator
@@ -43,10 +44,19 @@ fn hill_climb(
 ) -> (u8, u64) {
 	let mut scores = Vec::new();
 	let mut fitness_checks = 0;
+	let mut col = 0;
 
 	loop {
-		// Pick a random column and step in it
-		let col = rng.gen_range(0..BOARD_SIZE);
+		if RAND_COL {
+			// Pick a random column and step in it
+			col = rng.gen_range(0..BOARD_SIZE);
+		} else {
+			// Pick the next column cyclicly
+			col = (col + 1) % BOARD_SIZE;
+		}
+
+
+
 		let (fitness, checks) = hill_step(board, fitness_fn, col);
 		fitness_checks += checks;
 
